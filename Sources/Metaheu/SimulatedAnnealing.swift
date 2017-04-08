@@ -32,6 +32,12 @@ public class SimulatedAnnealing: Metaheuristic {
             T2 = T1 - beta
          */
         case Linear(beta: Double)
+        
+        /**
+            Custom cooling schedule, takes the current temperature
+            as input and should return the next temperature.
+         */
+        case Custom(function: (Double) -> Double)
     }
     
     // Algorithm parameters
@@ -49,7 +55,6 @@ public class SimulatedAnnealing: Metaheuristic {
     private var accepts: UInt
     private var rejects: UInt
     private var t: Double
-    private var totalEvaluations: UInt
     
     // Helpers
     private var globalBest: Solution = (result: .greatestFiniteMagnitude, guess: [])
@@ -77,7 +82,6 @@ public class SimulatedAnnealing: Metaheuristic {
         accepts = 0
         rejects = 0
         t = T0
-        totalEvaluations = 0
     }
 
     public func shouldContinue() -> Bool {
@@ -94,9 +98,9 @@ public class SimulatedAnnealing: Metaheuristic {
                 t = alpha * t
             case let .Linear(beta):
                 t = t - beta
+            case let .Custom(function):
+                t = function(t)
             }
-            
-            totalEvaluations += runs
             
             // Reset
             runs = 1
@@ -132,30 +136,5 @@ public class SimulatedAnnealing: Metaheuristic {
     
     public func willTerminate(withFinalSolution solution: Solution) -> Solution? {
         return globalBest
-    }
-    
-    public func statistics() -> [String:String] {
-        
-        // Get cooling schedule string
-        let cs: String
-        switch coolingSchedule {
-        case let .Geometric(alpha):
-            cs = "Geometric, alpha = \(alpha)"
-        case let .Linear(beta):
-            cs = "Linear, beta = \(beta)"
-        }
-        
-        return [
-            "Total evaluations": "\(totalEvaluations)",
-            "Returned global best": "\(true)",
-            "Initial temperature": "\(T0)",
-            "Minimum temperature": "\(Tmin)",
-            "Maximum rejects": "\(maxRejects)",
-            "Maximum runs": "\(maxRuns)",
-            "Maximum accepts": "\(maxAccepts)",
-            "Minimum difference": "\(minDiff)",
-            "Boltzmann constant (k)": "\(k)",
-            "Cooling schedule": "\(cs)",
-        ]
     }
 }

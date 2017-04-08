@@ -55,13 +55,6 @@ public protocol Metaheuristic {
         Return nil if no override is necessary (the default if unimplemented).
      */
     func willTerminate(withFinalSolution solution: Solution) -> Solution?
-    
-    /**
-        Returns an arbitrary dictionary with statistics of the Metaheuristic.
-        The dictionary may include, for example, the number of algorithm iterations,
-        whether the final solution was overriden with the best found, etc.
-     */
-    func statistics() -> [String:String]
 }
 
 extension Metaheuristic {
@@ -105,12 +98,5 @@ extension Metaheuristic {
      */
     func willTerminate(withFinalSolution solution: Solution) -> Solution? {
         return nil
-    }
-    
-    /**
-        By default we do not return any statistics
-     */
-    func statistics() -> [String:String] {
-        return ["Statistics":"None available"]
     }
 }
