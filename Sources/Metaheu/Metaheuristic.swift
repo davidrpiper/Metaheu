@@ -1,9 +1,12 @@
-//
-//  Metaheuristic.swift
-//  Metaheu
-//
-//  Created by David Piper on 6/4/17.
-//
+/**
+ *  Metaheuristic.swift
+ *  Metaheu
+ *
+ *  Copyright (c) 2016 - 2017 David Piper, @_davidpiper
+ *
+ *  This software may be modified and distributed under the terms
+ *  of the MIT license. See the LICENSE file for details.
+ */
 
 public protocol Metaheuristic {
     
@@ -12,6 +15,9 @@ public protocol Metaheuristic {
     
     /// A type for the result of the optimisation function
     associatedtype Result
+    
+    typealias Guess = [Input]
+    typealias Solution = (result: Result, guess: Guess)
     
     /**
         The metaheuristic algorithm will continue to iterate while this function
@@ -31,13 +37,31 @@ public protocol Metaheuristic {
         step() function. The optimization function will be calculated with the
         new guess.
      */
-    func generateNextGuessfromPreviousBest(guess: [Input]) -> [Input]
+    func generateNextGuess(fromPreviousBest guess: Guess) -> Guess
     
     /**
         Given the latest result of the optimization function, return true if this
         most result should be accepted over the previous best result.
      */
-    func shouldAccept(newResult: Result, previousResult: Result) -> Bool
+    func shouldAccept(newSolution: Solution, previousSolution: Solution) -> Bool
+    
+    /**
+        Called immediately before the Metheurtic algorithm completes. Gives the
+        algorithm a chance to return a different result from the one on which the
+        algorithm completed. The most common use case is to return the best solution
+        found across the whole algorithm (as the algorithm may terminate on a sub-
+        optimal solution).
+     
+        Return nil if no override is necessary (the default if unimplemented).
+     */
+    func willTerminate(withFinalSolution solution: Solution) -> Solution?
+    
+    /**
+        Returns an arbitrary dictionary with statistics of the Metaheuristic.
+        The dictionary may include, for example, the number of algorithm iterations,
+        whether the final solution was overriden with the best found, etc.
+     */
+    func statistics() -> [String:String]
 }
 
 extension Metaheuristic {
@@ -49,23 +73,44 @@ extension Metaheuristic {
         The function is an implementation of the mathematical function to optimise.
         Returns the optimal result found for 'y', and the associated array 'X'.
      */
-    public func run(initialGuess: [Input], function: ([Input]) -> Result) -> (result: Result, solution: [Input]) {
+    public func run(initialGuess: Guess, function: (Guess) -> Result) -> Solution {
         
         // Initial run
-        var bestSolution: [Input] = initialGuess
-        var bestResult: Result = function(bestSolution)
+        var bestGuess: Guess = initialGuess
+        var bestResult: Result = function(bestGuess)
         
         // Repeats
         while shouldContinue() {
             step()
-            let newGuess = generateNextGuessfromPreviousBest(guess: bestSolution)
+            let newGuess = generateNextGuess(fromPreviousBest: bestGuess)
             let result = function(newGuess)
-            if shouldAccept(newResult: result, previousResult: bestResult) {
+            
+            if shouldAccept(newSolution: (result, newGuess),
+                            previousSolution: (bestResult, bestGuess)) {
                 bestResult = result
-                bestSolution = newGuess
+                bestGuess = newGuess
             }
         }
         
-        return (bestResult, bestSolution)
+        // Check if we want to override the final guess (presumably with a more optimal one)
+        if let override = willTerminate(withFinalSolution: (bestResult, bestGuess)) {
+            return override
+        }
+        
+        return (bestResult, bestGuess)
+    }
+    
+    /**
+        By default we do not override the final solution from the algorithm.
+     */
+    func willTerminate(withFinalSolution solution: Solution) -> Solution? {
+        return nil
+    }
+    
+    /**
+        By default we do not return any statistics
+     */
+    func statistics() -> [String:String] {
+        return ["Statistics":"None available"]
     }
 }

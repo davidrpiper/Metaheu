@@ -1,9 +1,12 @@
-//
-//  Random.swift
-//  Metaheu
-//
-//  Created by David Piper on 6/4/17.
-//
+/**
+ *  Random.swift
+ *  Metaheu
+ *
+ *  Copyright (c) 2016 - 2017 David Piper, @_davidpiper
+ *
+ *  This software may be modified and distributed under the terms
+ *  of the MIT license. See the LICENSE file for details.
+ */
 
 #if os(Linux)
     import Glibc
@@ -25,7 +28,7 @@ public struct Random {
         
         This is a Swift implementation of Java's Random.nextGaussian().
      */
-    public static func randomGaussian() -> Double {
+    public static func gaussian() -> Double {
         if let gaussian = nextNextGaussian {
             nextNextGaussian = nil
             return gaussian
@@ -45,9 +48,7 @@ public struct Random {
     /**
         Returns a random Double from a uniform distribution between 0.0 and 1.0.
      */
-    public static func randomDouble() -> Double {
-        return Double(arc4random())
+    public static func double() -> Double {
+        return Double(arc4random()) / Double(UInt32.max)
     }
-    
 }
-
