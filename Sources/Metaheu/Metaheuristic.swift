@@ -96,7 +96,7 @@ extension Metaheuristic {
     /**
         By default we do not override the final solution from the algorithm.
      */
-    func willTerminate(withFinalSolution solution: Solution) -> Solution? {
+    public func willTerminate(withFinalSolution solution: Solution) -> Solution? {
         return nil
     }
 }

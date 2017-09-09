@@ -56,17 +56,30 @@ public class SimulatedAnnealing: Metaheuristic {
     private var rejects: UInt
     private var t: Double
     
-    // Helpers
+    // Global best for final returned solution
     private var globalBest: Solution = (result: .greatestFiniteMagnitude, guess: [])
     
-    /// TODO: Docs
+    /**
+        Create a Simulated Annealing metaheuristic. The goal of Simulated
+        Annealing is to minimise the result of the optimization function.
+
+        - Parameters:
+            - initialTemperature: The initial temperature of the system
+            - minimumTemperature: The initial temperature of the system
+            - coolingSchedule: The algorithm for how the system cools
+            - maxRejects: The number of poorer solutions ignored in a single cooling step before the algorithm will halt
+            - maxRuns: The number of runs after which a cooling event will occur
+            - maxAccepts: The number of accepted improvements after which a cooling event will occur
+            - minDiff: The minimum result difference for a new solution to be considered 'different' from the current solution
+            - k: The Boltzmann Constant (usually 1.0)
+     */
     public init(initialTemperature: Double = 1.0,
                 minimumTemperature: Double = 1e-10,
+                coolingSchedule: CoolingSchedule = .Geometric(alpha: 0.95),
                 maxRejects: UInt = 2500,
                 maxRuns: UInt = 500,
                 maxAccepts: UInt = 15,
                 minDiff: Double = 1e-8,
-                coolingSchedule: CoolingSchedule = .Geometric(alpha: 0.95),
                 k: Double = 1.0) {
         
         self.T0 = max(initialTemperature, 0)
